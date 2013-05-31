@@ -1,9 +1,10 @@
 require 'rake'
 require 'rspec/core/rake_task'
+Dir["./lib/*.rb"].each {|file| require file }
 require_relative 'db/config'
 
 
-desc "create the database"
+desc "create the database" 
 task "db:create" do
   touch 'db/ar-sunglight-legislators.sqlite3'
 end
@@ -20,6 +21,11 @@ task "db:migrate" do
   ActiveRecord::Migrator.migrate(ActiveRecord::Migrator.migrations_paths, ENV["VERSION"] ? ENV["VERSION"].to_i : nil) do |migration|
     ENV["SCOPE"].blank? || (ENV["SCOPE"] == migration.scope)
   end
+end
+
+# desc "load the csv data into the database"
+task "db:populate" do
+  SunlightLegislatorsImporter.import(File.expand_path('../db/data/legislators.csv', __FILE__))
 end
 
 desc 'Retrieves the current schema version number'
